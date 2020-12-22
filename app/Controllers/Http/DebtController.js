@@ -1,6 +1,6 @@
-'use strict'
+"use strict";
 
-const Debts = use('App/Models/Debt')
+const Debts = use("App/Models/Debt");
 
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
@@ -19,10 +19,10 @@ class DebtController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index () {
-    const debts = Debts.all()
+  async index() {
+    const debts = Debts.all();
 
-    return debts
+    return debts;
   }
 
   /**
@@ -34,7 +34,17 @@ class DebtController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async store ({ request, response }) {
+  async store({ auth, request, response }) {
+    const { id } = auth.user;
+    const data = request.only([
+      "user_id", 
+      "reason", 
+      "date", 
+      "value"]);
+
+    const debt = await Debts.create({...data , user_id: id})
+    
+    return debt
   }
 
   /**
@@ -46,7 +56,10 @@ class DebtController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
+  async show({ params }) {
+    const debt = await Debts.findOrFail(params.id);
+
+    return debt;
   }
 
   /**
@@ -58,7 +71,20 @@ class DebtController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async update ({ params, request, response }) {
+  async update({ params, request, response }) {
+    const debt = await Debts.findOrFail(params.id)
+    
+    const data = request.only([
+      "user_id", 
+      "reason", 
+      "date", 
+      "value"]);
+
+      debt.merge(data)
+
+      await debt.save()
+
+      return debt
   }
 
   /**
@@ -69,8 +95,15 @@ class DebtController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ params, request, response }) {
+  async destroy({ params, auth, response }) {
+    const debt = await Debts.findOrFail(params.id);
+
+    if (debt.user_id !== auth.user.id) {
+      return response.status(401).send({ error: "Not authorized" });
+    }
+
+    await debt.delete();
   }
 }
 
-module.exports = DebtController
+module.exports = DebtController;
