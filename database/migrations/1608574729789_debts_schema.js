@@ -9,6 +9,7 @@ class DebtsSchema extends Schema {
       table.increments()
       table.integer('user_id')
       .unsigned()
+      table.string('user_name', 120).notNullable()
       table.string('reason').notNullable()
       table.date('date').notNullable()
       table.decimal('value').notNullable()

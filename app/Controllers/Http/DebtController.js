@@ -38,6 +38,7 @@ class DebtController {
     const { id } = auth.user;
     const data = request.only([
       "user_id", 
+      "user_name", 
       "reason", 
       "date", 
       "value"]);
@@ -76,6 +77,7 @@ class DebtController {
     
     const data = request.only([
       "user_id", 
+      "user_name", 
       "reason", 
       "date", 
       "value"]);
